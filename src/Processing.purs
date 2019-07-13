@@ -61,35 +61,38 @@ type RuleWithContent =
   , isAnonymous :: Boolean
   }
 
-ruleToContent :: Rule -> RuleWithContent
-ruleToContent r = { name, value, isAnonymous }
+ruleToContent :: Rule -> Maybe RuleWithContent
+ruleToContent r = { name, value: _, isAnonymous } <$> mValue
   where
     name = renameToCamelCase r.name
-    value = fromRuleType r.value
+    mValue = fromRuleType r.value
     isAnonymous = isJust $ String.stripPrefix (Pattern "_") name
 
-fromRuleType :: RuleType -> RuleContent
+fromRuleType :: RuleType -> Maybe RuleContent
 fromRuleType ruleType = case ruleType of
-  ALIAS -> LiteralValue
-  BLANK -> LiteralValue
-  CHOICE { members } -> Choice $ fromRuleType <$> members
-  PATTERN _ -> LiteralValue
+  ALIAS -> pure LiteralValue
+  BLANK -> Nothing
+  CHOICE { members } -> pure $ Choice $ Array.mapMaybe fromRuleType members
+  PATTERN _ -> pure $ LiteralValue
   PREC  { content } -> fromRuleType content
   PREC_LEFT  { content } -> fromRuleType content
   PREC_RIGHT  { content } -> fromRuleType content
-  REPEAT { content } -> Repeat $ fromRuleType content
-  REPEAT1 { content } -> Repeat1 $ fromRuleType content
-  SEQ { members } -> Sequence $ fromRuleType <$> members
-  STRING { value } -> SyntaxValue value
-  SYMBOL { name } -> Reference $ renameToCamelCase name
-  TOKEN _ -> LiteralValue
+  REPEAT { content } -> Repeat <$> fromRuleType content
+  REPEAT1 { content } -> Repeat1 <$> fromRuleType content
+  SEQ { members } -> pure $ Sequence $ Array.mapMaybe fromRuleType members
+  STRING { value } -> pure $ SyntaxValue value
+  SYMBOL { name } -> pure $ Reference $ renameToCamelCase name
+  TOKEN _ -> pure $ LiteralValue
 
 -- because unary and binary have 20 cases, of which none matter
 deduplicateChoice :: RuleWithContent -> RuleWithContent
 deduplicateChoice rwc = rwc { value = deduplicate rwc.value }
   where
     deduplicate r = un Identity case r of
-      Choice choices -> pure $ Choice $ Array.nub choices
+      Choice choices -> case Array.nub choices of
+        -- if only one choice remains, unwrap it
+        xs | Just { head, tail: [] } <- Array.uncons xs -> pure head
+        xs -> pure $ Choice xs
       _ -> immediate (pure <<< deduplicate) r
 
 deferenceAnonymous :: Array RuleWithContent -> RuleWithContent -> RuleWithContent

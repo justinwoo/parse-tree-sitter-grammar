@@ -64,7 +64,7 @@ Formals ExprArgument
 
 
 Formal
-(Sequence [(Reference "Identifier"),(Choice [(Sequence [(SyntaxValue "?"),(Reference "_expr")]),LiteralValue])])
+(Sequence [(Reference "Identifier"),(Sequence [(SyntaxValue "?"),(Reference "_expr")])])
 Formal ExprArgument ExprArgument
 
 
@@ -84,7 +84,7 @@ With ExprArgument ExprArgument
 
 
 Let
-(Sequence [(SyntaxValue "let"),(Choice [(Reference "_binds"),LiteralValue]),(SyntaxValue "in"),(Reference "_exprFunction")])
+(Sequence [(SyntaxValue "let"),(Reference "_binds"),(SyntaxValue "in"),(Reference "_exprFunction")])
 Let ExprArgument ExprArgument
 
 
@@ -139,27 +139,27 @@ Parenthesized ExprArgument
 
 
 Attrset
-(Sequence [(SyntaxValue "{"),(Choice [(Reference "_binds"),LiteralValue]),(SyntaxValue "}")])
+(Sequence [(SyntaxValue "{"),(Reference "_binds"),(SyntaxValue "}")])
 Attrset ExprArgument
 
 
 LetAttrset
-(Sequence [(SyntaxValue "let"),(SyntaxValue "{"),(Choice [(Reference "_binds"),LiteralValue]),(SyntaxValue "}")])
+(Sequence [(SyntaxValue "let"),(SyntaxValue "{"),(Reference "_binds"),(SyntaxValue "}")])
 LetAttrset ExprArgument
 
 
 RecAttrset
-(Sequence [(SyntaxValue "rec"),(SyntaxValue "{"),(Choice [(Reference "_binds"),LiteralValue]),(SyntaxValue "}")])
+(Sequence [(SyntaxValue "rec"),(SyntaxValue "{"),(Reference "_binds"),(SyntaxValue "}")])
 RecAttrset ExprArgument
 
 
 String
-(Sequence [(SyntaxValue "\""),(Choice [(Reference "_stringParts"),LiteralValue]),(SyntaxValue "\"")])
+(Sequence [(SyntaxValue "\""),(Reference "_stringParts"),(SyntaxValue "\"")])
 String ExprArgument
 
 
 IndentedString
-(Sequence [(SyntaxValue "''"),(Choice [(Reference "_indStringParts"),LiteralValue]),(SyntaxValue "''")])
+(Sequence [(SyntaxValue "''"),(Reference "_indStringParts"),(SyntaxValue "''")])
 IndentedString ExprArgument
 
 
@@ -187,12 +187,12 @@ Inherit ExprArgument
 
 Attrpath
 (Sequence [(Reference "_attr"),(Repeat (Sequence [(SyntaxValue "."),(Reference "_attr")]))])
-Attrpath ExprArgument (ArrayArgument ExprArgument)
+Attrpath ExprArgument ArrayExprArgument
 
 
 Attrs
 (Repeat1 (Reference "_attr"))
-Attrs (ArrayArgument ExprArgument)
+Attrs ArrayExprArgument
 
 
 _attr
@@ -206,10 +206,49 @@ Interpolation ExprArgument
 
 List
 (Sequence [(SyntaxValue "["),(Repeat (Reference "_exprSelect")),(SyntaxValue "]")])
-List (ArrayArgument ExprArgument)
+List ArrayExprArgument
 
 
 Comment
 LiteralValue
 Comment StringArgument
+```
+
+## Expr
+
+```purs
+data Expr
+  = Expression Expr
+  | Identifier String
+  | Integer String
+  | Float String
+  | Path String
+  | Hpath String
+  | Spath String
+  | Uri String
+  | Function Expr
+  | Formals Expr
+  | Formal Expr Expr
+  | Ellipses
+  | Assert Expr Expr
+  | With Expr Expr
+  | Let (Array Expr) Expr
+  | If Expr Expr Expr
+  | Unary Expr
+  | Binary Expr
+  | App Expr Expr
+  | Select Expr
+  | Parenthesized Expr
+  | Attrset (Array Expr)
+  | LetAttrset (Array Expr)
+  | RecAttrset (Array Expr)
+  | String (Array Expr)
+  | IndentedString (Array Expr)
+  | Bind Expr Expr
+  | Inherit Expr
+  | Attrpath Expr (Array Expr)
+  | Attrs (Array Expr)
+  | Interpolation Expr
+  | List (Array Expr)
+  | Comment String
 ```

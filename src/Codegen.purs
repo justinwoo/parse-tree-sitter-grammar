@@ -6,7 +6,7 @@ import Data.Array as Array
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
-import Processing (RuleContent(..), RuleWithContent)
+import Processing (RuleContent(..), RuleWithContent, deduplicateChoice, deferenceAnonymous)
 
 -- goal: make data Expr of constructors, basically
 type ExprResult =
@@ -20,14 +20,30 @@ type Name = String
 data Argument
   = StringArgument
   | ExprArgument
-  | ArrayArgument Argument
+  | ArrayExprArgument
 derive instance genericArgument :: Generic Argument _
 instance showArgument :: Show Argument where show x = genericShow x
+
+printExprResult :: ExprResult -> Maybe String
+printExprResult { constructors } = case Array.uncons constructors of
+  Nothing -> Nothing
+  Just { head, tail } -> Just $ "data Expr" <> first <> rest
+    where
+      first = "\n  = " <> printConstructor head
+      printRest item = "\n  | " <> printConstructor item
+      rest = Array.foldMap printRest tail
+      printConstructor (Constructor name args) =
+        name <> Array.foldMap printArgument args
+      printArgument arg = case arg of
+        StringArgument -> " String"
+        ExprArgument -> " Expr"
+        ArrayExprArgument -> " (Array Expr)"
 
 mkExprResult :: Array RuleWithContent -> ExprResult
 mkExprResult xs = { constructors }
   where
-    constructors = Array.mapMaybe mkConstructor xs
+    ys = deduplicateChoice <<< deferenceAnonymous xs <$> xs
+    constructors = Array.mapMaybe mkConstructor ys
 
 -- only non anonymous can have constructors
 mkConstructor :: RuleWithContent -> Maybe Constructor
@@ -41,7 +57,7 @@ mkArguments r = case r of
   SyntaxValue _ -> []
   Reference _ -> [ ExprArgument ]
   Choice _ -> [ ExprArgument ]
-  Repeat _ -> [ ArrayArgument ExprArgument ]
-  Repeat1 _ -> [ ArrayArgument ExprArgument ]
+  Repeat _ -> [ ArrayExprArgument ]
+  Repeat1 _ -> [ ArrayExprArgument ]
   -- thankfully, sequences don't contain sequences
   Sequence xs -> mkArguments =<< xs
