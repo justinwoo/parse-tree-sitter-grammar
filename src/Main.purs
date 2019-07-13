@@ -9,7 +9,7 @@ import Effect.Class.Console (log)
 import Grammar (readRulesFromGrammarJSON')
 import Node.Encoding (Encoding(..))
 import Node.FS.Aff (readTextFile)
-import Processing (deferenceAnonymous, ruleToContent)
+import Processing (deduplicateChoice, deferenceAnonymous, ruleToContent)
 
 main :: Effect Unit
 main = Aff.launchAff_ do
@@ -20,7 +20,8 @@ main = Aff.launchAff_ do
   where
     print deref r' = do
       -- let r = deref r'
-      let r = r'
+      -- let r = r'
+      let r = deduplicateChoice r'
       log r.name
       log $ show r.value
       log ""

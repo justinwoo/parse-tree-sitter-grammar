@@ -84,6 +84,14 @@ fromRuleType ruleType = case ruleType of
   SYMBOL { name } -> Reference $ renameToCamelCase name
   TOKEN _ -> LiteralValue
 
+-- because unary and binary have 20 cases, of which none matter
+deduplicateChoice :: RuleWithContent -> RuleWithContent
+deduplicateChoice rwc = rwc { value = deduplicate rwc.value }
+  where
+    deduplicate r = un Identity case r of
+      Choice choices -> pure $ Choice $ Array.nub choices
+      _ -> immediate (pure <<< deduplicate) r
+
 deferenceAnonymous :: Array RuleWithContent -> RuleWithContent -> RuleWithContent
 deferenceAnonymous xs rwc = rwc { value = deref rwc.value }
   where
