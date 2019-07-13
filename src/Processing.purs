@@ -22,7 +22,7 @@ data RuleContent
   = LiteralValue
 
   -- just some syntax value, like brackets, parens
-  | SyntaxValue
+  | SyntaxValue String
 
   -- a reference another rule, SYMBOL
   | Reference String
@@ -47,7 +47,7 @@ derive instance ordRuleContent :: Ord RuleContent
 immediate :: forall f. Applicative f => (RuleContent -> f RuleContent) -> RuleContent -> f RuleContent
 immediate f r = case r of
   LiteralValue -> pure LiteralValue
-  SyntaxValue -> pure SyntaxValue
+  SyntaxValue s -> pure $ SyntaxValue s
   Reference string -> pure $ Reference string
   Choice xs -> Choice <$> traverse f xs
   Repeat x -> Repeat <$> f x
@@ -80,7 +80,7 @@ fromRuleType ruleType = case ruleType of
   REPEAT { content } -> Repeat $ fromRuleType content
   REPEAT1 { content } -> Repeat1 $ fromRuleType content
   SEQ { members } -> Sequence $ fromRuleType <$> members
-  STRING _ -> SyntaxValue
+  STRING { value } -> SyntaxValue value
   SYMBOL { name } -> Reference $ renameToCamelCase name
   TOKEN _ -> LiteralValue
 
