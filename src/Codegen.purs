@@ -6,7 +6,7 @@ import Data.Array as Array
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
-import Processing (RuleContent(..), RuleWithContent, deduplicateChoice, deferenceAnonymous)
+import Processing (RuleContent(..), RuleWithContent, deduplicateChoice, derefAnonymous)
 
 -- goal: make data Expr of constructors, basically
 type ExprResult =
@@ -42,7 +42,7 @@ printExprResult { constructors } = case Array.uncons constructors of
 mkExprResult :: Array RuleWithContent -> ExprResult
 mkExprResult xs = { constructors }
   where
-    ys = deduplicateChoice <<< deferenceAnonymous xs <$> xs
+    ys = deduplicateChoice <<< derefAnonymous xs <$> xs
     constructors = Array.mapMaybe mkConstructor ys
 
 -- only non anonymous can have constructors

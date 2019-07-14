@@ -85,7 +85,7 @@ With ExprArgument ExprArgument
 
 Let
 (Sequence [(SyntaxValue "let"),(Reference "_binds"),(SyntaxValue "in"),(Reference "_exprFunction")])
-Let ExprArgument ExprArgument
+Let ArrayExprArgument ExprArgument
 
 
 _exprIf
@@ -140,27 +140,27 @@ Parenthesized ExprArgument
 
 Attrset
 (Sequence [(SyntaxValue "{"),(Reference "_binds"),(SyntaxValue "}")])
-Attrset ExprArgument
+Attrset ArrayExprArgument
 
 
 LetAttrset
 (Sequence [(SyntaxValue "let"),(SyntaxValue "{"),(Reference "_binds"),(SyntaxValue "}")])
-LetAttrset ExprArgument
+LetAttrset ArrayExprArgument
 
 
 RecAttrset
 (Sequence [(SyntaxValue "rec"),(SyntaxValue "{"),(Reference "_binds"),(SyntaxValue "}")])
-RecAttrset ExprArgument
+RecAttrset ArrayExprArgument
 
 
 String
 (Sequence [(SyntaxValue "\""),(Reference "_stringParts"),(SyntaxValue "\"")])
-String ExprArgument
+String ArrayExprArgument
 
 
 IndentedString
 (Sequence [(SyntaxValue "''"),(Reference "_indStringParts"),(SyntaxValue "''")])
-IndentedString ExprArgument
+IndentedString ArrayExprArgument
 
 
 _stringParts
@@ -213,8 +213,6 @@ Comment
 LiteralValue
 Comment StringArgument
 ```
-
-## Expr
 
 ```purs
 data Expr

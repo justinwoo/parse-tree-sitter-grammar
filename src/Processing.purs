@@ -95,8 +95,8 @@ deduplicateChoice rwc = rwc { value = deduplicate rwc.value }
         xs -> pure $ Choice xs
       _ -> immediate (pure <<< deduplicate) r
 
-deferenceAnonymous :: Array RuleWithContent -> RuleWithContent -> RuleWithContent
-deferenceAnonymous xs rwc = rwc { value = deref rwc.value }
+derefAnonymous :: Array RuleWithContent -> RuleWithContent -> RuleWithContent
+derefAnonymous xs rwc = rwc { value = deref rwc.value }
   where
     deref :: RuleContent -> RuleContent
     deref r = un Identity case r of
