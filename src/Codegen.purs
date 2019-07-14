@@ -42,6 +42,33 @@ printExprResult { constructors } = case Array.uncons constructors of
         ExprArgument -> " Expr"
         ArrayExprArgument -> " (Array Expr)"
 
+printTypeLevel :: Array RuleWithContent -> String
+printTypeLevel rules =
+  Array.intercalate "\n" $ Array.mapMaybe printRule rules
+  where
+    -- special case strings, which i dont care about
+    printRule { name: "String" } = Just "type ParseString = LiteralValue"
+    printRule { name: "IndentedString" } = Just "type IndentedString = LiteralValue"
+    printRule { name: "_stringParts" } = Nothing
+    printRule { name: "_indStringParts" } = Nothing
+    printRule { name, isAnonymous, value } = Just do
+      let namePrefix = if isAnonymous then "Anon" else ""
+      "type Parse" <> namePrefix <> name <> " = " <> print value
+
+    print :: RuleContent -> String
+    print r = case r of
+      LiteralValue -> "LiteralValue"
+      SyntaxValue s -> "SyntaxValue " <> quoted s
+      Reference name -> "Reference " <> quoted name
+      Choice xs -> "Choice (" <> list xs <> ")"
+      Repeat x -> "Repeat (" <> print x <> ")"
+      Repeat1 x -> "Repeat1 (" <> print x <> ")"
+      Sequence xs -> "Sequence (" <> list xs <> ")"
+
+    quoted s = "\"" <> s <> "\""
+    item x = print x <> " : "
+    list xs = Array.foldMap item xs <> "TypeNil"
+
 mkExprResult :: Array RuleWithContent -> ExprResult
 mkExprResult xs = { constructors }
   where
