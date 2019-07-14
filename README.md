@@ -240,8 +240,8 @@ data Expr
   | Attrset (Array Expr)
   | LetAttrset (Array Expr)
   | RecAttrset (Array Expr)
-  | String (Array Expr)
-  | IndentedString (Array Expr)
+  | String String
+  | IndentedString String
   | Bind Expr Expr
   | Inherit Expr
   | Attrpath Expr (Array Expr)

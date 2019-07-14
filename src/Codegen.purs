@@ -32,8 +32,11 @@ printExprResult { constructors } = case Array.uncons constructors of
       first = "\n  = " <> printConstructor head
       printRest item = "\n  | " <> printConstructor item
       rest = Array.foldMap printRest tail
-      printConstructor (Constructor name args) =
-        name <> Array.foldMap printArgument args
+      printConstructor (Constructor name args) = case name of
+        -- special case strings because i dont care about the contents
+        "String" -> name <> " String"
+        "IndentedString" -> name <> " String"
+        _ -> name <> Array.foldMap printArgument args
       printArgument arg = case arg of
         StringArgument -> " String"
         ExprArgument -> " Expr"
