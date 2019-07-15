@@ -40,45 +40,45 @@ data Expr
   | Comment String
 derive instance genericExpr :: Generic Expr _
 
-type ParseExpression = Reference "_expr"
-type Parse_expr = Reference "_exprFunction"
-type ParseIdentifier = LiteralValue
-type ParseInteger = LiteralValue
-type ParseFloat = LiteralValue
-type ParsePath = LiteralValue
-type ParseHpath = LiteralValue
-type ParseSpath = LiteralValue
-type ParseUri = LiteralValue
-type Parse_exprFunction = Choice (Reference "Function" : Reference "Assert" : Reference "With" : Reference "Let" : Reference "_exprIf" : TypeNil)
-type ParseFunction = Choice (Sequence (Reference "Identifier" : SyntaxValue ":" : Reference "_exprFunction" : TypeNil) : Sequence (Reference "Formals" : SyntaxValue ":" : Reference "_exprFunction" : TypeNil) : Sequence (Reference "Formals" : SyntaxValue "@" : Reference "Identifier" : SyntaxValue ":" : Reference "_exprFunction" : TypeNil) : Sequence (Reference "Identifier" : SyntaxValue "@" : Reference "Formals" : SyntaxValue ":" : Reference "_exprFunction" : TypeNil) : TypeNil)
-type ParseFormals = Choice (Sequence (SyntaxValue "{" : SyntaxValue "}" : TypeNil) : Sequence (SyntaxValue "{" : Sequence (Reference "Formal" : Repeat (Sequence (SyntaxValue "," : Reference "Formal" : TypeNil)) : TypeNil) : SyntaxValue "}" : TypeNil) : Sequence (SyntaxValue "{" : Sequence (Reference "Formal" : Repeat (Sequence (SyntaxValue "," : Reference "Formal" : TypeNil)) : TypeNil) : SyntaxValue "," : Reference "Ellipses" : SyntaxValue "}" : TypeNil) : Sequence (SyntaxValue "{" : Reference "Ellipses" : SyntaxValue "}" : TypeNil) : TypeNil)
-type ParseFormal = Sequence (Reference "Identifier" : Choice (Sequence (SyntaxValue "?" : Reference "_expr" : TypeNil) : TypeNil) : TypeNil)
-type ParseEllipses = SyntaxValue "..."
-type ParseAssert = Sequence (SyntaxValue "assert" : Reference "_expr" : SyntaxValue ";" : Reference "_exprFunction" : TypeNil)
-type ParseWith = Sequence (SyntaxValue "with" : Reference "_expr" : SyntaxValue ";" : Reference "_exprFunction" : TypeNil)
-type ParseLet = Sequence (SyntaxValue "let" : Choice (Reference "_binds" : TypeNil) : SyntaxValue "in" : Reference "_exprFunction" : TypeNil)
-type Parse_exprIf = Choice (Reference "If" : Reference "_exprOp" : TypeNil)
-type ParseIf = Sequence (SyntaxValue "if" : Reference "_expr" : SyntaxValue "then" : Reference "_expr" : SyntaxValue "else" : Reference "_expr" : TypeNil)
-type Parse_exprOp = Choice (Reference "Unary" : Reference "Binary" : Reference "_exprApp" : TypeNil)
-type ParseUnary = Choice (Sequence (SyntaxValue "!" : Reference "_exprOp" : TypeNil) : Sequence (SyntaxValue "-" : Reference "_exprOp" : TypeNil) : TypeNil)
-type ParseBinary = Choice (Sequence (Reference "_exprOp" : SyntaxValue "==" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "!=" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "<" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "<=" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue ">" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue ">=" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "&&" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "||" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "->" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "//" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "?" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "+" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "-" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "*" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "/" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "++" : Reference "_exprOp" : TypeNil) : TypeNil)
-type Parse_exprApp = Choice (Reference "App" : Reference "_exprSelect" : TypeNil)
-type ParseApp = Sequence (Reference "_exprApp" : Reference "_exprSelect" : TypeNil)
-type Parse_exprSelect = Choice (Reference "Select" : Reference "_exprSimple" : TypeNil)
-type ParseSelect = Choice (Sequence (Reference "_exprSimple" : SyntaxValue "." : Reference "Attrpath" : TypeNil) : Sequence (Reference "_exprSimple" : SyntaxValue "." : Reference "Attrpath" : SyntaxValue "or" : Reference "_exprSelect" : TypeNil) : TypeNil)
-type Parse_exprSimple = Choice (Reference "Identifier" : Reference "Integer" : Reference "Float" : Reference "String" : Reference "IndentedString" : Reference "Path" : Reference "Hpath" : Reference "Spath" : Reference "Uri" : Reference "Parenthesized" : Reference "Attrset" : Reference "LetAttrset" : Reference "RecAttrset" : Reference "List" : TypeNil)
-type ParseParenthesized = Sequence (SyntaxValue "(" : Reference "_expr" : SyntaxValue ")" : TypeNil)
-type ParseAttrset = Sequence (SyntaxValue "{" : Choice (Reference "_binds" : TypeNil) : SyntaxValue "}" : TypeNil)
-type ParseLetAttrset = Sequence (SyntaxValue "let" : SyntaxValue "{" : Choice (Reference "_binds" : TypeNil) : SyntaxValue "}" : TypeNil)
-type ParseRecAttrset = Sequence (SyntaxValue "rec" : SyntaxValue "{" : Choice (Reference "_binds" : TypeNil) : SyntaxValue "}" : TypeNil)
-type ParseString = LiteralValue
-type IndentedString = LiteralValue
-type Parse_binds = Repeat1 (Choice (Reference "Bind" : Reference "Inherit" : TypeNil))
-type ParseBind = Sequence (Reference "Attrpath" : SyntaxValue "=" : Reference "_expr" : SyntaxValue ";" : TypeNil)
-type ParseInherit = Choice (Sequence (SyntaxValue "inherit" : Reference "Attrs" : SyntaxValue ";" : TypeNil) : Sequence (SyntaxValue "inherit" : Reference "Parenthesized" : Reference "Attrs" : SyntaxValue ";" : TypeNil) : TypeNil)
-type ParseAttrpath = Sequence (Reference "_attr" : Repeat (Sequence (SyntaxValue "." : Reference "_attr" : TypeNil)) : TypeNil)
-type ParseAttrs = Repeat1 (Reference "_attr")
-type Parse_attr = Choice (Reference "Identifier" : Reference "String" : Reference "Interpolation" : TypeNil)
-type ParseInterpolation = Sequence (SyntaxValue "${" : Reference "_expr" : SyntaxValue "}" : TypeNil)
-type ParseList = Sequence (SyntaxValue "[" : Repeat (Reference "_exprSelect") : SyntaxValue "]" : TypeNil)
-type ParseComment = LiteralValue
+type ParseExpression = ParseRule "Expression" IsNamed (Reference "_expr")
+type Parse_expr = ParseRule "_expr" IsAnonymous (Reference "_exprFunction")
+type ParseIdentifier = ParseRule "Identifier" IsNamed (LiteralValue)
+type ParseInteger = ParseRule "Integer" IsNamed (LiteralValue)
+type ParseFloat = ParseRule "Float" IsNamed (LiteralValue)
+type ParsePath = ParseRule "Path" IsNamed (LiteralValue)
+type ParseHpath = ParseRule "Hpath" IsNamed (LiteralValue)
+type ParseSpath = ParseRule "Spath" IsNamed (LiteralValue)
+type ParseUri = ParseRule "Uri" IsNamed (LiteralValue)
+type Parse_exprFunction = ParseRule "_exprFunction" IsAnonymous (Choice (Reference "Function" : Reference "Assert" : Reference "With" : Reference "Let" : Reference "_exprIf" : TypeNil))
+type ParseFunction = ParseRule "Function" IsNamed (Choice (Sequence (Reference "Identifier" : SyntaxValue ":" : Reference "_exprFunction" : TypeNil) : Sequence (Reference "Formals" : SyntaxValue ":" : Reference "_exprFunction" : TypeNil) : Sequence (Reference "Formals" : SyntaxValue "@" : Reference "Identifier" : SyntaxValue ":" : Reference "_exprFunction" : TypeNil) : Sequence (Reference "Identifier" : SyntaxValue "@" : Reference "Formals" : SyntaxValue ":" : Reference "_exprFunction" : TypeNil) : TypeNil))
+type ParseFormals = ParseRule "Formals" IsNamed (Choice (Sequence (SyntaxValue "{" : SyntaxValue "}" : TypeNil) : Sequence (SyntaxValue "{" : Sequence (Reference "Formal" : Repeat (Sequence (SyntaxValue "," : Reference "Formal" : TypeNil)) : TypeNil) : SyntaxValue "}" : TypeNil) : Sequence (SyntaxValue "{" : Sequence (Reference "Formal" : Repeat (Sequence (SyntaxValue "," : Reference "Formal" : TypeNil)) : TypeNil) : SyntaxValue "," : Reference "Ellipses" : SyntaxValue "}" : TypeNil) : Sequence (SyntaxValue "{" : Reference "Ellipses" : SyntaxValue "}" : TypeNil) : TypeNil))
+type ParseFormal = ParseRule "Formal" IsNamed (Sequence (Reference "Identifier" : Choice (Sequence (SyntaxValue "?" : Reference "_expr" : TypeNil) : TypeNil) : TypeNil))
+type ParseEllipses = ParseRule "Ellipses" IsNamed (SyntaxValue "...")
+type ParseAssert = ParseRule "Assert" IsNamed (Sequence (SyntaxValue "assert" : Reference "_expr" : SyntaxValue ";" : Reference "_exprFunction" : TypeNil))
+type ParseWith = ParseRule "With" IsNamed (Sequence (SyntaxValue "with" : Reference "_expr" : SyntaxValue ";" : Reference "_exprFunction" : TypeNil))
+type ParseLet = ParseRule "Let" IsNamed (Sequence (SyntaxValue "let" : Choice (Reference "_binds" : TypeNil) : SyntaxValue "in" : Reference "_exprFunction" : TypeNil))
+type Parse_exprIf = ParseRule "_exprIf" IsAnonymous (Choice (Reference "If" : Reference "_exprOp" : TypeNil))
+type ParseIf = ParseRule "If" IsNamed (Sequence (SyntaxValue "if" : Reference "_expr" : SyntaxValue "then" : Reference "_expr" : SyntaxValue "else" : Reference "_expr" : TypeNil))
+type Parse_exprOp = ParseRule "_exprOp" IsAnonymous (Choice (Reference "Unary" : Reference "Binary" : Reference "_exprApp" : TypeNil))
+type ParseUnary = ParseRule "Unary" IsNamed (Choice (Sequence (SyntaxValue "!" : Reference "_exprOp" : TypeNil) : Sequence (SyntaxValue "-" : Reference "_exprOp" : TypeNil) : TypeNil))
+type ParseBinary = ParseRule "Binary" IsNamed (Choice (Sequence (Reference "_exprOp" : SyntaxValue "==" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "!=" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "<" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "<=" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue ">" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue ">=" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "&&" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "||" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "->" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "//" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "?" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "+" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "-" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "*" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "/" : Reference "_exprOp" : TypeNil) : Sequence (Reference "_exprOp" : SyntaxValue "++" : Reference "_exprOp" : TypeNil) : TypeNil))
+type Parse_exprApp = ParseRule "_exprApp" IsAnonymous (Choice (Reference "App" : Reference "_exprSelect" : TypeNil))
+type ParseApp = ParseRule "App" IsNamed (Sequence (Reference "_exprApp" : Reference "_exprSelect" : TypeNil))
+type Parse_exprSelect = ParseRule "_exprSelect" IsAnonymous (Choice (Reference "Select" : Reference "_exprSimple" : TypeNil))
+type ParseSelect = ParseRule "Select" IsNamed (Choice (Sequence (Reference "_exprSimple" : SyntaxValue "." : Reference "Attrpath" : TypeNil) : Sequence (Reference "_exprSimple" : SyntaxValue "." : Reference "Attrpath" : SyntaxValue "or" : Reference "_exprSelect" : TypeNil) : TypeNil))
+type Parse_exprSimple = ParseRule "_exprSimple" IsAnonymous (Choice (Reference "Identifier" : Reference "Integer" : Reference "Float" : Reference "String" : Reference "IndentedString" : Reference "Path" : Reference "Hpath" : Reference "Spath" : Reference "Uri" : Reference "Parenthesized" : Reference "Attrset" : Reference "LetAttrset" : Reference "RecAttrset" : Reference "List" : TypeNil))
+type ParseParenthesized = ParseRule "Parenthesized" IsNamed (Sequence (SyntaxValue "(" : Reference "_expr" : SyntaxValue ")" : TypeNil))
+type ParseAttrset = ParseRule "Attrset" IsNamed (Sequence (SyntaxValue "{" : Choice (Reference "_binds" : TypeNil) : SyntaxValue "}" : TypeNil))
+type ParseLetAttrset = ParseRule "LetAttrset" IsNamed (Sequence (SyntaxValue "let" : SyntaxValue "{" : Choice (Reference "_binds" : TypeNil) : SyntaxValue "}" : TypeNil))
+type ParseRecAttrset = ParseRule "RecAttrset" IsNamed (Sequence (SyntaxValue "rec" : SyntaxValue "{" : Choice (Reference "_binds" : TypeNil) : SyntaxValue "}" : TypeNil))
+type ParseString = ParseRule "String" IsNamed LiteralValue
+type ParseIndentedString = ParseRule "IndentedString" IsNamed LiteralValue
+type Parse_binds = ParseRule "_binds" IsAnonymous (Repeat1 (Choice (Reference "Bind" : Reference "Inherit" : TypeNil)))
+type ParseBind = ParseRule "Bind" IsNamed (Sequence (Reference "Attrpath" : SyntaxValue "=" : Reference "_expr" : SyntaxValue ";" : TypeNil))
+type ParseInherit = ParseRule "Inherit" IsNamed (Choice (Sequence (SyntaxValue "inherit" : Reference "Attrs" : SyntaxValue ";" : TypeNil) : Sequence (SyntaxValue "inherit" : Reference "Parenthesized" : Reference "Attrs" : SyntaxValue ";" : TypeNil) : TypeNil))
+type ParseAttrpath = ParseRule "Attrpath" IsNamed (Sequence (Reference "_attr" : Repeat (Sequence (SyntaxValue "." : Reference "_attr" : TypeNil)) : TypeNil))
+type ParseAttrs = ParseRule "Attrs" IsNamed (Repeat1 (Reference "_attr"))
+type Parse_attr = ParseRule "_attr" IsAnonymous (Choice (Reference "Identifier" : Reference "String" : Reference "Interpolation" : TypeNil))
+type ParseInterpolation = ParseRule "Interpolation" IsNamed (Sequence (SyntaxValue "${" : Reference "_expr" : SyntaxValue "}" : TypeNil))
+type ParseList = ParseRule "List" IsNamed (Sequence (SyntaxValue "[" : Repeat (Reference "_exprSelect") : SyntaxValue "]" : TypeNil))
+type ParseComment = ParseRule "Comment" IsNamed (LiteralValue)

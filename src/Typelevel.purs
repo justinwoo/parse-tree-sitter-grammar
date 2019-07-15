@@ -17,4 +17,4 @@ data Choice (choices :: TypeList)
 data Repeat (rule :: Type)
 data Repeat1 (rule :: Type)
 
-data ParseRule (named :: Named) (rule :: Type) = ParseRule
+data ParseRule (name :: Symbol) (named :: Named) (rule :: Type) = ParseRule

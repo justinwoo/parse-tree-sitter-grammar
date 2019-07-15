@@ -47,12 +47,15 @@ printTypeLevel rules =
   Array.intercalate "\n" $ Array.mapMaybe printRule rules
   where
     -- special case strings, which i dont care about
-    printRule { name: "String" } = Just "type ParseString = LiteralValue"
-    printRule { name: "IndentedString" } = Just "type IndentedString = LiteralValue"
+    printRule { name: "String" } = Just $
+      "type ParseString = ParseRule " <> quoted "String" <> " IsNamed LiteralValue"
+    printRule { name: "IndentedString" } = Just $
+      "type ParseIndentedString = ParseRule " <> quoted "IndentedString" <> " IsNamed LiteralValue"
     printRule { name: "_stringParts" } = Nothing
     printRule { name: "_indStringParts" } = Nothing
     printRule { name, isAnonymous, value } = Just do
-      "type Parse" <> name <> " = " <> print value
+      let flag = if not isAnonymous then "IsNamed" else "IsAnonymous"
+      "type Parse" <> name <> " = ParseRule " <> quoted name <> " " <> flag <> " (" <> print value <> ")"
 
     print :: RuleContent -> String
     print r = case r of
