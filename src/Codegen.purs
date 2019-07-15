@@ -52,8 +52,7 @@ printTypeLevel rules =
     printRule { name: "_stringParts" } = Nothing
     printRule { name: "_indStringParts" } = Nothing
     printRule { name, isAnonymous, value } = Just do
-      let namePrefix = if isAnonymous then "Anon" else ""
-      "type Parse" <> namePrefix <> name <> " = " <> print value
+      "type Parse" <> name <> " = " <> print value
 
     print :: RuleContent -> String
     print r = case r of
