@@ -6,7 +6,7 @@ import Data.Array as Array
 import Data.Generic.Rep (class Generic)
 import Data.Generic.Rep.Show (genericShow)
 import Data.Maybe (Maybe(..))
-import Processing (RuleContent(..), RuleWithContent, deduplicateChoice, derefAnonymous)
+import Processing (RuleContent(..), RuleWithContent, processRulesWithContent)
 
 -- goal: make data Expr of constructors, basically
 type ExprResult =
@@ -44,10 +44,57 @@ printExprResult { constructors } = case Array.uncons constructors of
         ArrayExprArgument -> " (Array Expr)"
         SyntaxArgument  -> " Syntax"
 
+mkExprResult :: Array RuleWithContent -> ExprResult
+mkExprResult xs = { constructors }
+  where
+    ys = processRulesWithContent xs
+    constructors = Array.mapMaybe mkConstructor ys
+
+-- only non anonymous can have constructors
+mkConstructor :: RuleWithContent -> Maybe Constructor
+mkConstructor { isAnonymous: true } = Nothing
+mkConstructor r = Just $ Constructor r.name $ mkArguments r.value
+
+-- what arguments does the constructor take for these
+mkArguments :: RuleContent -> Array Argument
+mkArguments r = case r of
+  LiteralValue -> [ StringArgument ]
+  SyntaxValue -> [ SyntaxArgument ]
+  Reference _ -> [ ExprArgument ]
+  Choice _ -> [ ExprArgument ]
+  Repeat _ -> [ ArrayExprArgument ]
+  Repeat1 _ -> [ ArrayExprArgument ]
+  -- thankfully, sequences don't contain sequences
+  Sequence xs -> mkArguments =<< xs
+
+data TypeLevelCodegen
+  = TLLiteralValue
+  | TLSyntaxValue
+  | TLReference
+  | TLSequence (Array TypeLevelCodegen)
+  | TLChoice (Array TypeLevelCodegen)
+  | TLRepeat TypeLevelCodegen
+  | TLRepeat1 TypeLevelCodegen
+
+derive instance eqTypeLevelCodegen :: Eq TypeLevelCodegen
+derive instance ordTypeLevelCodegen :: Ord TypeLevelCodegen
+
+ruleContentToTLCodegen :: RuleContent -> TypeLevelCodegen
+ruleContentToTLCodegen rc = case rc of
+  LiteralValue -> TLLiteralValue
+  SyntaxValue -> TLSyntaxValue
+  Reference _ -> TLReference
+  Choice xs -> TLChoice $ Array.nub $ map ruleContentToTLCodegen xs
+  Sequence xs -> TLSequence $ map ruleContentToTLCodegen xs
+  Repeat x -> TLRepeat $ ruleContentToTLCodegen x
+  Repeat1 x -> TLRepeat1 $ ruleContentToTLCodegen x
+
 printTypeLevel :: Array RuleWithContent -> String
-printTypeLevel rules =
+printTypeLevel rules' =
   Array.intercalate "\n" $ Array.mapMaybe printRule rules
   where
+    rules = processRulesWithContent rules'
+
     -- special case strings, which i dont care about
     printRule { name: "String" } = Just $
       "type ParseString = ParseRule " <> quoted "String" <> " IsNamed LiteralValue"
@@ -60,38 +107,18 @@ printTypeLevel rules =
       "type Parse" <> name <> " = ParseRule " <> quoted name <> " " <> flag <> " (" <> print value <> ")"
 
     print :: RuleContent -> String
-    print r = case r of
-      LiteralValue -> "LiteralValue"
-      SyntaxValue s -> "SyntaxValue " <> quoted s
-      Reference name -> "Reference " <> quoted name
-      Choice xs -> "Choice (" <> list xs <> ")"
-      Repeat x -> "Repeat (" <> print x <> ")"
-      Repeat1 x -> "Repeat1 (" <> print x <> ")"
-      Sequence xs -> "Sequence (" <> list xs <> ")"
+    print r = print' $ ruleContentToTLCodegen r
+
+    print' :: TypeLevelCodegen -> String
+    print' r = case r of
+      TLLiteralValue -> "LiteralValue"
+      TLSyntaxValue -> "SyntaxValue"
+      TLReference -> "Reference"
+      TLChoice xs -> "Choice (" <> list xs <> ")"
+      TLRepeat x -> "Repeat (" <> print' x <> ")"
+      TLRepeat1 x -> "Repeat1 (" <> print' x <> ")"
+      TLSequence xs -> "Sequence (" <> list xs <> ")"
 
     quoted s = "\"" <> s <> "\""
-    item x = print x <> " : "
+    item x = print' x <> " : "
     list xs = Array.foldMap item xs <> "TypeNil"
-
-mkExprResult :: Array RuleWithContent -> ExprResult
-mkExprResult xs = { constructors }
-  where
-    ys = deduplicateChoice <<< derefAnonymous xs <$> xs
-    constructors = Array.mapMaybe mkConstructor ys
-
--- only non anonymous can have constructors
-mkConstructor :: RuleWithContent -> Maybe Constructor
-mkConstructor { isAnonymous: true } = Nothing
-mkConstructor r = Just $ Constructor r.name $ mkArguments r.value
-
--- what arguments does the constructor take for these
-mkArguments :: RuleContent -> Array Argument
-mkArguments r = case r of
-  LiteralValue -> [ StringArgument ]
-  SyntaxValue _ -> [ SyntaxArgument ]
-  Reference _ -> [ ExprArgument ]
-  Choice _ -> [ ExprArgument ]
-  Repeat _ -> [ ArrayExprArgument ]
-  Repeat1 _ -> [ ArrayExprArgument ]
-  -- thankfully, sequences don't contain sequences
-  Sequence xs -> mkArguments =<< xs

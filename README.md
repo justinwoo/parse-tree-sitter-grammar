@@ -2,4 +2,6 @@
 
 i might work on this later, we'll see
 
-[output](./src/Output.purs)
+## todo:
+
+throw away current version

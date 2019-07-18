@@ -22,10 +22,10 @@ data RuleContent
   = LiteralValue
 
   -- just some syntax value, like brackets, parens
-  | SyntaxValue String
+  | SyntaxValue
 
   -- a reference another rule, SYMBOL
-  | Reference String
+  | Reference { typeName :: String, name :: String }
 
   -- a choice of alternatives, CHOICE
   | Choice (Array RuleContent)
@@ -47,7 +47,7 @@ derive instance ordRuleContent :: Ord RuleContent
 immediate :: forall f. Applicative f => (RuleContent -> f RuleContent) -> RuleContent -> f RuleContent
 immediate f r = case r of
   LiteralValue -> pure LiteralValue
-  SyntaxValue s -> pure $ SyntaxValue s
+  SyntaxValue -> pure SyntaxValue
   Reference string -> pure $ Reference string
   Choice xs -> Choice <$> traverse f xs
   Repeat x -> Repeat <$> f x
@@ -80,8 +80,8 @@ fromRuleType ruleType = case ruleType of
   REPEAT { content } -> Repeat <$> fromRuleType content
   REPEAT1 { content } -> Repeat1 <$> fromRuleType content
   SEQ { members } -> pure $ Sequence $ Array.mapMaybe fromRuleType members
-  STRING { value } -> pure $ SyntaxValue value
-  SYMBOL { name } -> pure $ Reference $ renameToCamelCase name
+  STRING { value } -> pure SyntaxValue
+  SYMBOL { name } -> pure $ Reference { typeName: name, name: renameToCamelCase name }
   TOKEN _ -> pure $ LiteralValue
 
 -- because unary and binary have 20 cases, of which none matter
@@ -100,7 +100,7 @@ derefAnonymous xs rwc = rwc { value = deref rwc.value }
   where
     deref :: RuleContent -> RuleContent
     deref r = un Identity case r of
-      Reference name
+      Reference { name }
         | Just x <- Array.find (eq name <<< _.name) xs
         , x.isAnonymous -> pure $ deref x.value
       _ -> immediate (pure <<< deref) r
@@ -116,3 +116,7 @@ renameToCamelCase str = result
       "_" : x : rest -> toUpper x <> change rest
       x : rest -> x <> change rest
       Nil -> ""
+
+-- | common preprocessing of rules with content
+processRulesWithContent :: Array RuleWithContent -> Array RuleWithContent
+processRulesWithContent xs = deduplicateChoice <<< derefAnonymous xs <$> xs
