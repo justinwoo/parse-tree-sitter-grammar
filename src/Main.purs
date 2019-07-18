@@ -47,6 +47,8 @@ main = Aff.launchAff_ do
           <> "\n"
           <> "import Data.Generic.Rep (class Generic)\n"
           <> "\n"
+          <> "newtype Syntax = Syntax String\n"
+          <> "\n"
           <> datatype
           <> "\n"
           <> "derive instance genericExpr :: Generic Expr _\n"

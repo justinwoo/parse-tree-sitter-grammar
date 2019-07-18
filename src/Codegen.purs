@@ -21,6 +21,7 @@ data Argument
   = StringArgument
   | ExprArgument
   | ArrayExprArgument
+  | SyntaxArgument
 derive instance genericArgument :: Generic Argument _
 instance showArgument :: Show Argument where show x = genericShow x
 
@@ -41,6 +42,7 @@ printExprResult { constructors } = case Array.uncons constructors of
         StringArgument -> " String"
         ExprArgument -> " Expr"
         ArrayExprArgument -> " (Array Expr)"
+        SyntaxArgument  -> " Syntax"
 
 printTypeLevel :: Array RuleWithContent -> String
 printTypeLevel rules =
@@ -86,7 +88,7 @@ mkConstructor r = Just $ Constructor r.name $ mkArguments r.value
 mkArguments :: RuleContent -> Array Argument
 mkArguments r = case r of
   LiteralValue -> [ StringArgument ]
-  SyntaxValue _ -> []
+  SyntaxValue _ -> [ SyntaxArgument ]
   Reference _ -> [ ExprArgument ]
   Choice _ -> [ ExprArgument ]
   Repeat _ -> [ ArrayExprArgument ]

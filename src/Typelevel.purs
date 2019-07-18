@@ -1,5 +1,8 @@
 module Typelevel where
 
+import Data.Generic.Rep (class Generic)
+import Type.Prelude (class IsSymbol)
+
 foreign import kind TypeList
 foreign import data TypeCons :: Type -> TypeList -> TypeList
 foreign import data TypeNil :: TypeList
@@ -18,3 +21,10 @@ data Repeat (rule :: Type)
 data Repeat1 (rule :: Type)
 
 data ParseRule (name :: Symbol) (named :: Named) (rule :: Type) = ParseRule
+
+class FromRule rule result | rule -> result
+
+instance fromRuleLiteral :: FromRule LiteralValue String
+instance fromRuleSyntaxValue ::
+  ( IsSymbol literal
+  ) => FromRule (SyntaxValue literal) String

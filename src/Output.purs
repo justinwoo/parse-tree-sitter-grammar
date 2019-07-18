@@ -4,6 +4,8 @@ import Typelevel
 
 import Data.Generic.Rep (class Generic)
 
+newtype Syntax = Syntax String
+
 data Expr
   = Expression Expr
   | Identifier String
@@ -15,28 +17,28 @@ data Expr
   | Uri String
   | Function Expr
   | Formals Expr
-  | Formal Expr Expr
-  | Ellipses
-  | Assert Expr Expr
-  | With Expr Expr
-  | Let (Array Expr) Expr
-  | If Expr Expr Expr
+  | Formal Expr Syntax Expr
+  | Ellipses Syntax
+  | Assert Syntax Expr Syntax Expr
+  | With Syntax Expr Syntax Expr
+  | Let Syntax (Array Expr) Syntax Expr
+  | If Syntax Expr Syntax Expr Syntax Expr
   | Unary Expr
   | Binary Expr
   | App Expr Expr
   | Select Expr
-  | Parenthesized Expr
-  | Attrset (Array Expr)
-  | LetAttrset (Array Expr)
-  | RecAttrset (Array Expr)
+  | Parenthesized Syntax Expr Syntax
+  | Attrset Syntax (Array Expr) Syntax
+  | LetAttrset Syntax Syntax (Array Expr) Syntax
+  | RecAttrset Syntax Syntax (Array Expr) Syntax
   | String String
   | IndentedString String
-  | Bind Expr Expr
+  | Bind Expr Syntax Expr Syntax
   | Inherit Expr
   | Attrpath Expr (Array Expr)
   | Attrs (Array Expr)
-  | Interpolation Expr
-  | List (Array Expr)
+  | Interpolation Syntax Expr Syntax
+  | List Syntax (Array Expr) Syntax
   | Comment String
 derive instance genericExpr :: Generic Expr _
 
