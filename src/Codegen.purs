@@ -63,7 +63,7 @@ printTypeLevel rules =
     print r = case r of
       LiteralValue -> "LiteralValue"
       SyntaxValue s -> "SyntaxValue " <> quoted s
-      Reference name -> "Reference " <> quoted name
+      Reference { typeName, name } -> "Reference " <> quoted name <> " " <> quoted typeName
       Choice xs -> "Choice (" <> list xs <> ")"
       Repeat x -> "Repeat (" <> print x <> ")"
       Repeat1 x -> "Repeat1 (" <> print x <> ")"

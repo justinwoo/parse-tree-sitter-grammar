@@ -25,7 +25,7 @@ data RuleContent
   | SyntaxValue String
 
   -- a reference another rule, SYMBOL
-  | Reference String
+  | Reference { typeName :: String, name :: String }
 
   -- a choice of alternatives, CHOICE
   | Choice (Array RuleContent)
@@ -81,7 +81,7 @@ fromRuleType ruleType = case ruleType of
   REPEAT1 { content } -> Repeat1 <$> fromRuleType content
   SEQ { members } -> pure $ Sequence $ Array.mapMaybe fromRuleType members
   STRING { value } -> pure $ SyntaxValue value
-  SYMBOL { name } -> pure $ Reference $ renameToCamelCase name
+  SYMBOL { name } -> pure $ Reference { typeName: name, name: renameToCamelCase name }
   TOKEN _ -> pure $ LiteralValue
 
 -- because unary and binary have 20 cases, of which none matter
@@ -100,7 +100,7 @@ derefAnonymous xs rwc = rwc { value = deref rwc.value }
   where
     deref :: RuleContent -> RuleContent
     deref r = un Identity case r of
-      Reference name
+      Reference { name }
         | Just x <- Array.find (eq name <<< _.name) xs
         , x.isAnonymous -> pure $ deref x.value
       _ -> immediate (pure <<< deref) r
